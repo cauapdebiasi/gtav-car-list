@@ -9,13 +9,12 @@ export async function getStaticPaths() {
   // Call an external API endpoint to get posts
   const res = await fetch("https://gta.now.sh/api/vehicles/names");
   let vehicleNames = await res.json();
-  delete vehicleNames["brioso r/a"]
-  
+
   // Get the paths we want to pre-render based on posts
   const paths = vehicleNames.map((vehicleName) => {
     return {
       params: { vehicleName },
-    }
+    };
   });
 
   // We'll pre-render only these paths at build time.
@@ -37,36 +36,35 @@ export async function getStaticProps({ params }) {
     const manufacturerImage = await manufacturerRes.text();
     return {
       props: {
-        vehicleResponse: [{
-        vehicleName: params.vehicleName,
-        vehicleDetails,
-        manufacturerImage,
-      },null]},
+        vehicleResponse: [
+          {
+            vehicleName: params.vehicleName,
+            vehicleDetails,
+            manufacturerImage,
+          },
+          null,
+        ],
+      },
     };
   } catch (error) {
     return {
       props: {
-        vehicleResponse:[null,error.message] 
+        vehicleResponse: [null, String(error.message)],
       },
     };
   }
-  
+
   // Pass post data to the page via props
-  
 }
 
-export default function VehicleName({
-  vehicleResponse
-}) {
+export default function VehicleName({ vehicleResponse }) {
+  const [vehicleInfo, error] = vehicleResponse;
 
-  const [{vehicleName,vehicleDetails,manufacturerImage},error] = vehicleResponse
+  if (error) return (<p>An error ocurred when trying to fetch.</p>);
 
-  
+  const { vehicleName, vehicleDetails, manufacturerImage } = vehicleInfo;
 
   return (
-    error ? (
-      <p>An error ocurred when trying to fetch.</p>
-    ) : (
     <Layout>
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-[20px]">
@@ -213,6 +211,6 @@ export default function VehicleName({
           />
         </div>
       </section>
-    </Layout>)
-  )
+    </Layout>
+  );
 }
