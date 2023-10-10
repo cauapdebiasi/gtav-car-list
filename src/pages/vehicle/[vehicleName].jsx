@@ -8,12 +8,15 @@ import { playClick, playHover } from "@/components/SoundEffect";
 export async function getStaticPaths() {
   // Call an external API endpoint to get posts
   const res = await fetch("https://gta.now.sh/api/vehicles/names");
-  const vehicleNames = await res.json();
-
+  let vehicleNames = await res.json();
+  delete vehicleNames["brioso r/a"]
+  
   // Get the paths we want to pre-render based on posts
-  const paths = vehicleNames.map((vehicleName) => ({
-    params: { vehicleName },
-  }));
+  const paths = vehicleNames.map((vehicleName) => {
+    return {
+      params: { vehicleName },
+    }
+  });
 
   // We'll pre-render only these paths at build time.
   // { fallback: false } means other routes should 404.
@@ -23,30 +26,47 @@ export async function getStaticPaths() {
 export async function getStaticProps({ params }) {
   // params contains the post `id`.
   // If the route is like /posts/1, then params.id is 1
-  const res = await fetch(
-    `https://gta.vercel.app/api/vehicles/${params.vehicleName}`
-  );
-  const vehicleDetails = await res.json();
-  const manufacturerRes = await fetch(
-    `https://gta.vercel.app/api/vehicles/manufacturer/${vehicleDetails["manufacturer"]}`
-  );
-  const manufacturerImage = await manufacturerRes.text();
+  try {
+    const res = await fetch(
+      `https://gta.vercel.app/api/vehicles/${params.vehicleName}`
+    );
+    const vehicleDetails = await res.json();
+    const manufacturerRes = await fetch(
+      `https://gta.vercel.app/api/vehicles/manufacturer/${vehicleDetails["manufacturer"]}`
+    );
+    const manufacturerImage = await manufacturerRes.text();
+    return {
+      props: {
+        vehicleResponse: [{
+        vehicleName: params.vehicleName,
+        vehicleDetails,
+        manufacturerImage,
+      },null]},
+    };
+  } catch (error) {
+    return {
+      props: {
+        vehicleResponse:[null,error] 
+      },
+    };
+  }
+  
   // Pass post data to the page via props
-  return {
-    props: {
-      vehicleName: params.vehicleName,
-      vehicleDetails,
-      manufacturerImage,
-    },
-  };
+  
 }
 
 export default function VehicleName({
-  vehicleName,
-  vehicleDetails,
-  manufacturerImage,
+  vehicleResponse
 }) {
+
+  const [{vehicleName,vehicleDetails,manufacturerImage},error] = vehicleResponse
+
+  
+
   return (
+    error ? (
+      <p>An error ocurred when trying to fetch.</p>
+    ) : (
     <Layout>
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-[20px]">
@@ -193,6 +213,6 @@ export default function VehicleName({
           />
         </div>
       </section>
-    </Layout>
-  );
+    </Layout>)
+  )
 }
