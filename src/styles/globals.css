@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .red-button {
+    @apply rounded border border-[#6c1114] shadow-sm shadow-[#660403] bg-gradient-to-t from-[#7e0d10] to-[#c50607]
+  }
+
+  .red-button-hoverable {
+    @apply rounded border border-[#6c1114] shadow-sm shadow-[#660403] bg-gradient-to-t hover:bg-gradient-to-b from-[#7e0d10] to-[#c50607]
+  }
+}
+
+a:hover,button:hover {
+  cursor: url('/xp-middle-finger-2.cur'), pointer;
+}
+
+meter::-webkit-meter-bar {
+  background: #705252;
+  border-radius: 0px;
+  border: 0;
+}
+
+meter::-webkit-meter-optimum-value {
+  background: #fcfeff;
+}
