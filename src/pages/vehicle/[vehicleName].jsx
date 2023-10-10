@@ -46,7 +46,7 @@ export async function getStaticProps({ params }) {
   } catch (error) {
     return {
       props: {
-        vehicleResponse:[null,error] 
+        vehicleResponse:[null,error.message] 
       },
     };
   }
